@@ -64,12 +64,13 @@ class MyDevice extends Device {
             if(uuid.uuid=="181a"){
               var datas = uuid["data"];
               const dattta = Buffer.from(uuid["data"],'hex');
+              const rawValue = ((dattta[6] << 8) | dattta[7]);
               console.log(device.localName)
-              console.log("Temp: ",((dattta[6] << 8) | dattta[7]) / 10, "Celsius");
+              console.log("Temp: ",(((rawValue & 0x8000) ? -0x8000 : 0) + (rawValue & 0x7FFF)) / 10, "Celsius");
               console.log("Hum: ",dattta[8],"%");
               console.log("Batt: ",dattta[9],"%");
               console.log("");
-              let temperature = ((dattta[6] << 8) | dattta[7]) / 10;
+              let temperature = (((rawValue & 0x8000) ? -0x8000 : 0) + (rawValue & 0x7FFF)) / 10;
               let humidity = dattta[8];
               let battery = dattta[9];
               this.setCapabilityValue('measure_temperature', temperature);
@@ -87,7 +88,9 @@ class MyDevice extends Device {
 }
 function readTemperature(buffer) {
   const data = Buffer.from(uuid["data"],'hex');
+  const rawValue = ((data[6] << 8) | data[7]);
+  const value = (((rawValue & 0x8000) ? -0x8000 : 0) + (rawValue & 0x7FFF)) / 10;
   console.log(((data[6] << 8) | data[7]) / 10), "readtemperature";
-  return ((data[6] << 8) | data[7]) / 10;
+  return (value);
 }
 module.exports = MyDevice;
